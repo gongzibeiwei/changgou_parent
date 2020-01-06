@@ -180,7 +180,7 @@ public class SearchServiceImpl implements SearchService {
             //封装规格的分组结果
             StringTerms specTerms = (StringTerms) resultInfo.getAggregation(skuSpec);
             List<String> specList = specTerms.getBuckets().stream().map(bucket -> bucket.getKeyAsString()).collect(Collectors.toList());
-            resultMap.put("specList", specList);
+            resultMap.put("specList", this.formartSpec(specList));
 
             //封装当前页
             resultMap.put("pageNum", pageNum);
@@ -188,5 +188,45 @@ public class SearchServiceImpl implements SearchService {
             return resultMap;
         }
         return null;
+    }
+
+    /**
+     * 将JSON数据格式化
+     * <p>
+     * 原有数据
+     * [
+     * "{'颜色':'黑色', '尺码':'150度'}",
+     * "{'颜色':'红色', '尺码':'200度'}",
+     * "{'颜色':'蓝色', '尺码':'250度'}"
+     * ]
+     * <p>
+     * 需要的数据格式
+     * {
+     * 颜色:['黑色','红色','蓝色']
+     * 尺码:['150度','200度','250度']
+     * }
+     *
+     * @param specList
+     * @return
+     */
+    public Map<String, Set<String>> formartSpec(List<String> specList) {
+        Map<String, Set<String>> resultMap = new HashMap<>();
+        if (specList != null && specList.size() > 0) {
+            for (String specJsonString : specList) {
+                //将JSON转换为Map
+                Map<String, String> specMap = JSON.parseObject(specJsonString, Map.class);
+                for (String specKey : specMap.keySet()) {
+                    Set<String> specSet = resultMap.get(specKey);
+                    if (specSet == null) {
+                        specSet = new HashSet<String>();
+                    }
+                    //将规格的值放入set集合中
+                    specSet.add(specMap.get(specKey));
+                    //将set放入map中
+                    resultMap.put(specKey, specSet);
+                }
+            }
+        }
+        return resultMap;
     }
 }
