@@ -38,6 +38,25 @@ public class SearchController {
 
         model.addAttribute("result", resultMap);
         model.addAttribute("searchMap", searchMap);
+
+        //拼接url
+        StringBuilder url = new StringBuilder("/search/list");
+        if (searchMap != null && searchMap.size() > 0) {
+            //有查询条件
+            url.append("?");
+            for (String paramKey : searchMap.keySet()) {
+                if (!"sortRule".equals(searchMap.get(paramKey)) && !"sortField".equals(searchMap.get(paramKey)) && !"pageNum".equals(searchMap.get(paramKey))) {
+                    url.append(paramKey).append("=").append(searchMap.get(paramKey)).append("&");
+                }
+            }
+            //http://localhost:9009/search/list?keywords=手机&spec_网络制式=4G&
+            String urlString = url.toString();
+            //去除路径中的最后一个与号
+            urlString = urlString.substring(0, urlString.length() - 1);
+            model.addAttribute("url", urlString);
+        } else {
+            model.addAttribute("url", url);
+        }
         return "search";
     }
 
