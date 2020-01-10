@@ -39,6 +39,17 @@ public class UserController {
         return new Result(true,StatusCode.OK,"查询成功",user);
     }
 
+    /**
+     * 查询用户信息
+     * @param username
+     * @return
+     */
+    @GetMapping("/load/{username}")
+    public User findUserInfo(@PathVariable("username") String username){
+        User user = userService.findById(username);
+        return user;
+    }
+
 
     /***
      * 新增数据
