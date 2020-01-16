@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 public class AuthToken implements Serializable{
 
-    //令牌信息
+    //令牌信息 jwt
     String accessToken;
     //刷新token(refresh_token)
     String refreshToken;

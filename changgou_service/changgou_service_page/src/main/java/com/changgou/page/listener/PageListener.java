@@ -6,20 +6,16 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * @author Jaime
- * @date 2020/1/8
- * @desc
- */
 @Component
 public class PageListener {
+
     @Autowired
     private PageService pageService;
 
     @RabbitListener(queues = RabbitMQConfig.PAGE_CREATE_QUEUE)
-    public void receiveMessage(String spuId) {
-        System.out.println("获取静态化页面的商品id：" + spuId);
-        //调用业务层方法生成静态化页面
+    public void receiveMessage(String spuId){
+        System.out.println("获取静态化页面的商品id,id的值为:   "+spuId);
+        //条用业务层完成静态化页面生成
         pageService.generateHtml(spuId);
     }
 }

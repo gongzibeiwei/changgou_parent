@@ -8,30 +8,21 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    /**
-     * 从cookie中获取jti的值
-     *
-     * @param request
-     * @return
-     */
+    //从cookie中获取jti的值
     public String getJtiFromCookie(ServerHttpRequest request) {
-        HttpCookie cookie = request.getCookies().getFirst("uid");
-        if (cookie != null) {
-            String jti = cookie.getValue();
+        HttpCookie httpCookie = request.getCookies().getFirst("uid");
+        if (httpCookie != null){
+            String jti = httpCookie.getValue();
             return jti;
         }
         return null;
     }
 
-    /**
-     * 从redis中获取jwt令牌
-     *
-     * @param jti
-     * @return
-     */
+    //从redis中获取jwt
     public String getJwtFromRedis(String jti) {
         String jwt = stringRedisTemplate.boundValueOps(jti).get();
         return jwt;

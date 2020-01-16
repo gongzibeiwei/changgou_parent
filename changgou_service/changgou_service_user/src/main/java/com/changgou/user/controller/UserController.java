@@ -6,6 +6,7 @@ import com.changgou.user.service.UserService;
 import com.changgou.user.pojo.User;
 import com.github.pagehelper.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class UserController {
      * @return
      */
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('accountant')")
     public Result findAll(){
         List<User> userList = userService.findAll();
         return new Result(true, StatusCode.OK,"查询成功",userList) ;
@@ -39,16 +41,12 @@ public class UserController {
         return new Result(true,StatusCode.OK,"查询成功",user);
     }
 
-    /**
-     * 查询用户信息
-     * @param username
-     * @return
-     */
     @GetMapping("/load/{username}")
     public User findUserInfo(@PathVariable("username") String username){
         User user = userService.findById(username);
         return user;
     }
+
 
 
     /***

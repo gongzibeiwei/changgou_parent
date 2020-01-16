@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "user")
 public interface UserFeign {
+
     @GetMapping("/user/load/{username}")
     public User findUserInfo(@PathVariable("username") String username);
 }
