@@ -1,6 +1,7 @@
 package com.changgou.goods.service;
 
 import com.changgou.goods.pojo.Sku;
+import com.changgou.order.pojo.OrderItem;
 import com.github.pagehelper.Page;
 
 import java.util.List;
@@ -63,7 +64,7 @@ public interface SkuService {
      */
     Page<Sku> findPage(Map<String, Object> searchMap, int page, int size);
 
-
+    void decrCount(String username);
 
 
 }

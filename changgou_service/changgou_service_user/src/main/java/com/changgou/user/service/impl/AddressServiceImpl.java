@@ -20,6 +20,7 @@ public class AddressServiceImpl implements AddressService {
 
     /**
      * 查询全部列表
+     *
      * @return
      */
     @Override
@@ -29,130 +30,152 @@ public class AddressServiceImpl implements AddressService {
 
     /**
      * 根据ID查询
+     *
      * @param id
      * @return
      */
     @Override
-    public Address findById(Integer id){
-        return  addressMapper.selectByPrimaryKey(id);
+    public Address findById(Integer id) {
+        return addressMapper.selectByPrimaryKey(id);
     }
 
 
     /**
      * 增加
+     *
      * @param address
      */
     @Override
-    public void add(Address address){
+    public void add(Address address) {
         addressMapper.insert(address);
     }
 
 
     /**
      * 修改
+     *
      * @param address
      */
     @Override
-    public void update(Address address){
+    public void update(Address address) {
         addressMapper.updateByPrimaryKey(address);
     }
 
     /**
      * 删除
+     *
      * @param id
      */
     @Override
-    public void delete(Integer id){
+    public void delete(Integer id) {
         addressMapper.deleteByPrimaryKey(id);
     }
 
 
     /**
      * 条件查询
+     *
      * @param searchMap
      * @return
      */
     @Override
-    public List<Address> findList(Map<String, Object> searchMap){
+    public List<Address> findList(Map<String, Object> searchMap) {
         Example example = createExample(searchMap);
         return addressMapper.selectByExample(example);
     }
 
     /**
      * 分页查询
+     *
      * @param page
      * @param size
      * @return
      */
     @Override
-    public Page<Address> findPage(int page, int size){
-        PageHelper.startPage(page,size);
-        return (Page<Address>)addressMapper.selectAll();
+    public Page<Address> findPage(int page, int size) {
+        PageHelper.startPage(page, size);
+        return (Page<Address>) addressMapper.selectAll();
     }
 
     /**
      * 条件+分页查询
+     *
      * @param searchMap 查询条件
-     * @param page 页码
-     * @param size 页大小
+     * @param page      页码
+     * @param size      页大小
      * @return 分页结果
      */
     @Override
-    public Page<Address> findPage(Map<String,Object> searchMap, int page, int size){
-        PageHelper.startPage(page,size);
+    public Page<Address> findPage(Map<String, Object> searchMap, int page, int size) {
+        PageHelper.startPage(page, size);
         Example example = createExample(searchMap);
-        return (Page<Address>)addressMapper.selectByExample(example);
+        return (Page<Address>) addressMapper.selectByExample(example);
+    }
+
+    /**
+     * 根据当前登录人获取与之相关的收件人地址信息
+     *
+     * @param username
+     * @return
+     */
+    @Override
+    public List<Address> list(String username) {
+        Address address = new Address();
+        address.setUsername(username);
+        List<Address> addressList = addressMapper.select(address);
+        return addressList;
     }
 
     /**
      * 构建查询对象
+     *
      * @param searchMap
      * @return
      */
-    private Example createExample(Map<String, Object> searchMap){
-        Example example=new Example(Address.class);
+    private Example createExample(Map<String, Object> searchMap) {
+        Example example = new Example(Address.class);
         Example.Criteria criteria = example.createCriteria();
-        if(searchMap!=null){
+        if (searchMap != null) {
             // 用户名
-            if(searchMap.get("username")!=null && !"".equals(searchMap.get("username"))){
-                criteria.andEqualTo("username",searchMap.get("username"));
-           	}
+            if (searchMap.get("username") != null && !"".equals(searchMap.get("username"))) {
+                criteria.andEqualTo("username", searchMap.get("username"));
+            }
             // 省
-            if(searchMap.get("provinceid")!=null && !"".equals(searchMap.get("provinceid"))){
-                criteria.andLike("provinceid","%"+searchMap.get("provinceid")+"%");
-           	}
+            if (searchMap.get("provinceid") != null && !"".equals(searchMap.get("provinceid"))) {
+                criteria.andLike("provinceid", "%" + searchMap.get("provinceid") + "%");
+            }
             // 市
-            if(searchMap.get("cityid")!=null && !"".equals(searchMap.get("cityid"))){
-                criteria.andLike("cityid","%"+searchMap.get("cityid")+"%");
-           	}
+            if (searchMap.get("cityid") != null && !"".equals(searchMap.get("cityid"))) {
+                criteria.andLike("cityid", "%" + searchMap.get("cityid") + "%");
+            }
             // 县/区
-            if(searchMap.get("areaid")!=null && !"".equals(searchMap.get("areaid"))){
-                criteria.andLike("areaid","%"+searchMap.get("areaid")+"%");
-           	}
+            if (searchMap.get("areaid") != null && !"".equals(searchMap.get("areaid"))) {
+                criteria.andLike("areaid", "%" + searchMap.get("areaid") + "%");
+            }
             // 电话
-            if(searchMap.get("phone")!=null && !"".equals(searchMap.get("phone"))){
-                criteria.andLike("phone","%"+searchMap.get("phone")+"%");
-           	}
+            if (searchMap.get("phone") != null && !"".equals(searchMap.get("phone"))) {
+                criteria.andLike("phone", "%" + searchMap.get("phone") + "%");
+            }
             // 详细地址
-            if(searchMap.get("address")!=null && !"".equals(searchMap.get("address"))){
-                criteria.andLike("address","%"+searchMap.get("address")+"%");
-           	}
+            if (searchMap.get("address") != null && !"".equals(searchMap.get("address"))) {
+                criteria.andLike("address", "%" + searchMap.get("address") + "%");
+            }
             // 联系人
-            if(searchMap.get("contact")!=null && !"".equals(searchMap.get("contact"))){
-                criteria.andLike("contact","%"+searchMap.get("contact")+"%");
-           	}
+            if (searchMap.get("contact") != null && !"".equals(searchMap.get("contact"))) {
+                criteria.andLike("contact", "%" + searchMap.get("contact") + "%");
+            }
             // 是否是默认 1默认 0否
-            if(searchMap.get("isDefault")!=null && !"".equals(searchMap.get("isDefault"))){
-                criteria.andEqualTo("isDefault",searchMap.get("isDefault"));
-           	}
+            if (searchMap.get("isDefault") != null && !"".equals(searchMap.get("isDefault"))) {
+                criteria.andEqualTo("isDefault", searchMap.get("isDefault"));
+            }
             // 别名
-            if(searchMap.get("alias")!=null && !"".equals(searchMap.get("alias"))){
-                criteria.andLike("alias","%"+searchMap.get("alias")+"%");
-           	}
+            if (searchMap.get("alias") != null && !"".equals(searchMap.get("alias"))) {
+                criteria.andLike("alias", "%" + searchMap.get("alias") + "%");
+            }
 
             // id
-            if(searchMap.get("id")!=null ){
-                criteria.andEqualTo("id",searchMap.get("id"));
+            if (searchMap.get("id") != null) {
+                criteria.andEqualTo("id", searchMap.get("id"));
             }
 
         }
