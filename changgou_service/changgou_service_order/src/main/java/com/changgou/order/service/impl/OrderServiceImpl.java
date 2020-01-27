@@ -14,9 +14,11 @@ import com.changgou.order.pojo.Task;
 import com.changgou.order.service.CartService;
 import com.changgou.order.service.OrderService;
 import com.changgou.order.pojo.Order;
+import com.changgou.pay.feign.PayFeign;
 import com.changgou.util.IdWorker;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,10 @@ public class OrderServiceImpl implements OrderService {
     private TaskMapper taskMapper;
     @Autowired
     private OrderLogMapper orderLogMapper;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private PayFeign payFeign;
 
     /**
      * 查询全部列表
@@ -130,6 +136,9 @@ public class OrderServiceImpl implements OrderService {
 
         //5.删除购物车数据
         redisTemplate.delete("cart_" + order.getUsername());
+
+        //发送消息到延迟队列
+        rabbitTemplate.convertAndSend("", "queue.ordercreate", orderId);
 
         return orderId;
     }
@@ -228,6 +237,64 @@ public class OrderServiceImpl implements OrderService {
             orderLogMapper.insert(orderLog);
         }
 
+    }
+
+    /**
+     * 关闭订单
+     *
+     * @param orderId
+     */
+    @Override
+    @Transactional
+    public void closeOrder(String orderId) {
+        System.out.println("关闭订单业务开启:" + orderId);
+        //1.根据订单id查询MySQL中的订单信息，判断订单是否存在，判断订单的支付状态
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        if (!"0".equals(order.getPayStatus())) {
+            System.out.println("当前订单不需要关闭");
+            return;
+        }
+        System.out.println("关闭订单校验通过：" + orderId);
+
+        //2.基于微信查询订单的信息（该订单信息属于微信）
+        Map wxQueryMap = (Map) payFeign.queryOrder(orderId).getData();
+        System.out.println("查询微信支付订单：" + wxQueryMap);
+        //2.1）如果当前订单支付状态为已支付，则进行数据补偿（MySQL）
+        if ("SUCCESS".equals(wxQueryMap.get("trade_state"))) {
+            this.updatePayStatus(orderId, (String) wxQueryMap.get("transaction_id"));
+            System.out.println("完成数据补偿");
+        }
+        //2.2）如果当前订单的支付状态为未支付，则修改MySQL中的订单信息，新增订单日志，恢复商品的库存，基于微信关闭订单
+        if ("NOTPAY".equals(wxQueryMap.get("trade_state"))) {
+            System.out.println("执行关闭订单操作");
+            //修改MySQL中相关的订单信息
+            order.setUpdateTime(new Date());
+            order.setOrderStatus("4");//4代表订单已关闭
+            orderMapper.updateByPrimaryKeySelective(order);
+
+            //新增订单日志
+            OrderLog orderLog = new OrderLog();
+            orderLog.setId(idWorker.nextId() + "");
+            orderLog.setOperater("system");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOrderStatus("4");
+            orderLog.setOrderId(order.getId());
+            orderLogMapper.insert(orderLog);
+
+            //恢复商品库存
+            OrderItem _orderItem = new OrderItem();
+            _orderItem.setOrderId(orderId);
+            List<OrderItem> orderItemList = orderItemMapper.select(_orderItem);
+            for (OrderItem orderItem : orderItemList) {
+                skuFeign.resumeStockNum(orderItem.getSkuId(), orderItem.getNum());
+            }
+
+            //基于微信关闭订单
+            payFeign.closeOrder(orderId);
+        }
     }
 
     /**

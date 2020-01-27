@@ -19,4 +19,12 @@ public interface WXPayService {
      * @return
      */
     Map queryOrder(String orderId);
+
+    /**
+     * 基于微信关闭订单
+     *
+     * @param orderId
+     * @return
+     */
+    Map closeOrder(String orderId);
 }

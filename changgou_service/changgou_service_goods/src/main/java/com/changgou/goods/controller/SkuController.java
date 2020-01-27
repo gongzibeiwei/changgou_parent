@@ -127,9 +127,28 @@ public class SkuController {
         return skuList;
     }
 
+    /**
+     * 扣减库存
+     *
+     * @param username
+     * @return
+     */
     @PostMapping("/decr/count")
     public Result decrCount(@RequestParam("username") String username) {
         skuService.decrCount(username);
         return new Result(true, StatusCode.OK, "库存扣减成功");
+    }
+
+    /**
+     * 回滚库存
+     *
+     * @param skuId
+     * @param num
+     * @return
+     */
+    @RequestMapping("/resumeStockNum")
+    public Result resumeStockNum(@RequestParam("skuId") String skuId, @RequestParam("num") Integer num) {
+        skuService.resumeStockNum(skuId, num);
+        return new Result(true, StatusCode.OK, "回滚库存成功");
     }
 }

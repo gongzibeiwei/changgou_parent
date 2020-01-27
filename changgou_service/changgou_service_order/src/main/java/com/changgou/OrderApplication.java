@@ -15,24 +15,24 @@ import tk.mybatis.spring.annotation.MapperScan;
 @EnableEurekaClient
 @EnableScheduling //开启定时任务
 @MapperScan(basePackages = {"com.changgou.order.dao"})
-@EnableFeignClients(basePackages = {"com.changgou.goods.feign"})
+@EnableFeignClients(basePackages = {"com.changgou.goods.feign", "com.changgou.pay.feign"})
 public class OrderApplication {
     public static void main(String[] args) {
-        SpringApplication.run( OrderApplication.class);
+        SpringApplication.run(OrderApplication.class);
     }
 
     @Bean
-    public TokenDecode tokenDecode(){
+    public TokenDecode tokenDecode() {
         return new TokenDecode();
     }
 
     @Bean
-    public IdWorker idWorker(){
-        return new IdWorker(1,1);
+    public IdWorker idWorker() {
+        return new IdWorker(1, 1);
     }
 
     @Bean
-    public FeignInterceptor feignInterceptor(){
+    public FeignInterceptor feignInterceptor() {
         return new FeignInterceptor();
     }
 }
