@@ -11,4 +11,12 @@ public interface WXPayService {
      * @return
      */
     Map nativePay(String orderId, Integer money);
+
+    /**
+     * 基于微信查询订单
+     *
+     * @param orderId
+     * @return
+     */
+    Map queryOrder(String orderId);
 }

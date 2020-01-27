@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "pay")
 public interface PayFeign {
 
-    @GetMapping("/wxPay/nativePay")
+    @GetMapping("/wxpay/nativePay")
     public Result nativePay(@RequestParam("orderId") String orderId, @RequestParam("money") Integer money);
 }

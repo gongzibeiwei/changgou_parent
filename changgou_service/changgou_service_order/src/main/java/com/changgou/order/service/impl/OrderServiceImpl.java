@@ -5,9 +5,11 @@ import com.alibaba.fescar.spring.annotation.GlobalTransactional;
 import com.changgou.goods.feign.SkuFeign;
 import com.changgou.order.config.RabbitMQConfig;
 import com.changgou.order.dao.OrderItemMapper;
+import com.changgou.order.dao.OrderLogMapper;
 import com.changgou.order.dao.OrderMapper;
 import com.changgou.order.dao.TaskMapper;
 import com.changgou.order.pojo.OrderItem;
+import com.changgou.order.pojo.OrderLog;
 import com.changgou.order.pojo.Task;
 import com.changgou.order.service.CartService;
 import com.changgou.order.service.OrderService;
@@ -18,6 +20,7 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -42,6 +45,8 @@ public class OrderServiceImpl implements OrderService {
     private SkuFeign skuFeign;
     @Autowired
     private TaskMapper taskMapper;
+    @Autowired
+    private OrderLogMapper orderLogMapper;
 
     /**
      * 查询全部列表
@@ -189,6 +194,40 @@ public class OrderServiceImpl implements OrderService {
         PageHelper.startPage(page, size);
         Example example = createExample(searchMap);
         return (Page<Order>) orderMapper.selectByExample(example);
+    }
+
+    /**
+     * 修改订单支付状态
+     *
+     * @param orderId
+     * @param transactionId
+     */
+    @Override
+    @Transactional
+    public void updatePayStatus(String orderId, String transactionId) {
+        //1.查询订单状态
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order != null && "0".equals(order.getPayStatus())) {
+            //2.修改订单支付状态
+            order.setPayStatus("1");//已支付
+            order.setOrderStatus("1");//已支付
+            order.setUpdateTime(new Date());//修改时间
+            order.setPayTime(new Date());//支付时间
+            order.setTransactionId(transactionId);//微信返回的交易流水号
+            orderMapper.updateByPrimaryKeySelective(order);
+
+            //3.记录订单日志
+            OrderLog orderLog = new OrderLog();
+            orderLog.setId(idWorker.nextId() + "");
+            orderLog.setOperater("system");
+            orderLog.setOperateTime(new Date());
+            orderLog.setOrderStatus("1");
+            orderLog.setPayStatus("1");
+            orderLog.setRemarks("交易流水号：" + transactionId);
+            orderLog.setOrderId(orderId);
+            orderLogMapper.insert(orderLog);
+        }
+
     }
 
     /**

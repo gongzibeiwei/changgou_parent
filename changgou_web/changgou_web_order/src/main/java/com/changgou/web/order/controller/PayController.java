@@ -48,7 +48,22 @@ public class PayController {
         payMap.put("orderId", orderId);
         payMap.put("payMoney", order.getPayMoney());
 
+        System.out.println(payMap.get("payMoney"));
+        System.out.println(order.getPayMoney());
+
         model.addAllAttributes(payMap);
         return "wxpay";
+    }
+
+    /**
+     * 页面支付成功跳转
+     *
+     * @param payMoney
+     * @return
+     */
+    @RequestMapping("/toPaySuccess")
+    public String toPaySuccess(Integer payMoney, Model model) {
+        model.addAttribute("payMoney", payMoney);
+        return "paysuccess";
     }
 }

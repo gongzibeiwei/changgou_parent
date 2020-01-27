@@ -71,5 +71,11 @@ public interface OrderService {
      */
     Page<Order> findPage(Map<String, Object> searchMap, int page, int size);
 
-
+    /**
+     * 修改订单支付状态
+     *
+     * @param orderId
+     * @param transactionId
+     */
+    void updatePayStatus(String orderId, String transactionId);
 }

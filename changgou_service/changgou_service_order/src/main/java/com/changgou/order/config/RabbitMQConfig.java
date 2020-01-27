@@ -23,6 +23,15 @@ public class RabbitMQConfig {
     //完成添加积分路由key
     public static final String CG_BUYING_FINISHADDPOINT_KEY = "finishaddpoint";
 
+    //微信支付成功队列
+    public static final String ORDER_PAY = "order_pay";
+
+    //声明队列
+    @Bean
+    public Queue queue() {
+        return new Queue(ORDER_PAY);
+    }
+
     //声明交换机
     @Bean(EX_BUYING_ADDPOINTUSER)
     public Exchange EX_BUYING_ADDPOINTUSER(){
