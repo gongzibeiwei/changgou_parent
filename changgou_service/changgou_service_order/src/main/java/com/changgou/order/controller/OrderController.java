@@ -119,5 +119,15 @@ public class OrderController {
         return new Result(true, StatusCode.OK, "查询成功", pageResult);
     }
 
-
+    /**
+     * 批量发货
+     *
+     * @param orders
+     * @return
+     */
+    @PostMapping("/batchSend")
+    public Result batchSend(@RequestBody List<Order> orders) {
+        orderService.batchSend(orders);
+        return new Result(true, StatusCode.OK, "发货成功");
+    }
 }

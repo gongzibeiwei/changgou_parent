@@ -26,10 +26,17 @@ public class RabbitMQConfig {
     //微信支付成功队列
     public static final String ORDER_PAY = "order_pay";
 
+    public static final String ORDER_TACK = "order_tack";
+
     //声明队列
     @Bean
     public Queue queue() {
         return new Queue(ORDER_PAY);
+    }
+
+    @Bean
+    public Queue ORDER_TACK() {
+        return new Queue(ORDER_TACK);
     }
 
     //声明交换机
